@@ -117,6 +117,7 @@
             let newTimes = JSON.parse(result)["available_times"]
             self.shuttleTimes = newTimes
             CacheMan.set(cacheStr, newTimes)
+            self.form.time = newTimes[0]
           })
           .catch(function(error) {
             console.log(error)
