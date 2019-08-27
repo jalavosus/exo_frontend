@@ -11,7 +11,9 @@
     "bootstrap": "^4.3.1",
     "bootstrap-vue": "^2.0.0-rc.28",
     "core-js": "^2.6.5",
+    "node-cache": "^4.2.1",
     "request": "^2.88.0",
+    "request-promise": "^4.2.4",
     "vue": "^2.6.10",
     "vue-bootstrap-datetimepicker": "^5.0.1",
     "vue-router": "^3.0.3"

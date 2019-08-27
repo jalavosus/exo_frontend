@@ -24,46 +24,18 @@
               id="direction-dropdown"
               v-model="form.direction"
               :options="direction_list"
+              @change="onDirectionPickerChange"
             )
 
           b-form-group#date(label="Select a date" label-for="datepicker" label-align="left" label-class="boldlabel")
             Datepicker#datepicker(v-model="form.date" :config="datepickerOptions" @dp-change="onDatepickerChange")
 
           b-form-group#timepicker(label="Select a time" label-for="time-select" label-align="left" label-class="boldlabel")
-            div(v-if="form.direction === 'uptown'")
-              b-form-select.select-field(
-                v-if="checkWeekday(form.date)"
-                id="time-select"
-                v-model="form.time"
-                :options="uptownWeekdayTimes")
-              b-form-select.select-field(
-                v-else-if="checkFriday(form.date)"
-                id="time-select"
-                v-model="form.time"
-                :options="uptownFridayTimes")
-              b-form-select.select-field(
-                v-else-if="checkSaturday(form.date)"
-                id="time-select"
-                v-model="form.time")
-              b-form-select.select-field(
-                v-else
-                id="time-select"
-                v-model="form.time")
-            div(v-else-if="form.direction === 'downtown'")
-              b-form-select.select-field(
-                v-if="checkWeekday(form.date)"
-                id="time-select"
-                v-model="form.time"
-                :options="downtownWeekdayTimes")
-              b-form-select.select-field(
-                v-else-if="checkFriday(form.date)"
-                id="time-select"
-                v-model="form.time"
-                :options="downtownFridayTimes")
-              b-form-select.select-field(
-                v-else
-                id="time-select"
-                v-model="form.time")
+            b-form-select.select-field(
+              id="time-select"
+              v-model="form.time"
+              :options="shuttleTimes")
+
           b-button(type="submit" variant="primary" style="margin-bottom: -1.5em;" size="lg")
             | Book a shuttle!
 </template>
@@ -82,11 +54,15 @@
 </style>
 
 <script>
+  /* eslint-disable */
   import Datepicker from 'vue-bootstrap-datetimepicker'
   import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
   import { uptownWeekdayTimes, downtownWeekdayTimes } from "../shuttleTimes.js"
   import { uptownFridayTimes,  downtownFridayTimes }  from "../shuttleTimes.js"
-  import Request from "request"
+  import Request from "request-promise"
+  import Cache from "node-cache"
+
+  let CacheMan = new Cache()
 
   export default {
     components: {
@@ -99,7 +75,7 @@
           email:      "",
           direction:  "uptown",
           date:       new Date().toISOString().slice(0,10),
-          time:       "12:00am"
+          time:       "12:00 AM"
         },
         show: true,
         direction_list: [
@@ -109,11 +85,12 @@
           format: "YYYY-MM-DD",
           useCurrent: true,
         },
-        uptownWeekdayTimes:   uptownWeekdayTimes,
-        downtownWeekdayTimes: downtownWeekdayTimes,
-        uptownFridayTimes:    uptownFridayTimes,
-        downtownFridayTimes:  downtownFridayTimes
+        shuttleTimes: [],
       }
+    },
+    created() {
+      console.log("Test")
+      this.getShuttleTimes(this.form.date, this.form.direction)
     },
     methods: {
       getDay(date) {
@@ -122,46 +99,49 @@
 
         return obj.getDay()
       },
-      checkWeekday(date) {
-        var day = this.getDay(date)
-        var isWeekday = true
-
-        if (day === 0 || day === 5 || day === 6) {
-          isWeekday = false
+      getShuttleTimes(date, direction) {
+        var direc = 0
+        switch (direction) {
+          case "uptown":    direc = 1; break
+          case "downtown":  direc = 2; break
         }
 
-        return isWeekday
-      },
-      checkFriday(date) {
-        var day = this.getDay(date)
+        let cacheStr = `times-${date}-${direction}`
+        let cacheCheck = CacheMan.get(cacheStr)
+        if (cacheCheck != null) {
+          this.shuttleTimes = cacheCheck
+          return
+        }
 
-        return day === 5
-      },
-      checkSaturday(date) {
-        var day = this.getDay(date)
+        let self = this
 
-        return day === 6
+        Request.get(`https://backend.exo.fish/shuttleTimes?direction=${direc}&date=${date}`)
+          .then(function(result) {
+            let newTimes = JSON.parse(result)["available_times"]
+            self.shuttleTimes = newTimes
+            CacheMan.set(cacheStr, newTimes)
+          })
+          .catch(function(error) {
+            console.log(error)
+          })
       },
-      checkSunday(date) {
-        var day = this.getDay(date)
-
-        return day === 0
-      },
-      // eslint-disable-next-line
       onDatepickerChange(evt) {
-        this.form.time = "12:00am"
+        this.form.time = "12:00 AM"
+        this.getShuttleTimes(this.form.date, this.form.direction)
+      },
+      onDirectionPickerChange(newDirection) {
+        this.getShuttleTimes(this.form.date, newDirection)
       },
       onSubmit(evt) {
         evt.preventDefault()
         let formData = JSON.parse(JSON.stringify(this.form))
         Request.post(
-          "http://localhost:8080/shuttles",
+          "https://backend.exo.fish/shuttles",
           { form: formData },
           // eslint-disable-next-line
           function (error, response, body) {
             if (response.statusCode == 200) {
-              // eslint-disable-next-line
-              console.log("Hell yeah")
+              // console.log("Hell yeah")
             }
           }
         )
