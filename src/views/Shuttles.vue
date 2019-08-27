@@ -57,8 +57,6 @@
   /* eslint-disable */
   import Datepicker from 'vue-bootstrap-datetimepicker'
   import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
-  import { uptownWeekdayTimes, downtownWeekdayTimes } from "../shuttleTimes.js"
-  import { uptownFridayTimes,  downtownFridayTimes }  from "../shuttleTimes.js"
   import Request from "request-promise"
   import Cache from "node-cache"
 
@@ -89,7 +87,6 @@
       }
     },
     created() {
-      console.log("Test")
       this.getShuttleTimes(this.form.date, this.form.direction)
     },
     methods: {
