@@ -145,16 +145,16 @@
         evt.preventDefault()
         let formData = JSON.parse(JSON.stringify(this.form))
         this.submitButtonIsDisabled = true
-        // Request.post(
-        //   "https://backend.exo.fish/shuttles",
-        //   { form: formData },
-        //   // eslint-disable-next-line
-        //   function (error, response, body) {
-        //     if (response.statusCode == 200) {
-        //       // console.log("Hell yeah")
-        //     }
-        //   }
-        // )
+        Request.post(
+          "https://backend.exo.fish/shuttles",
+          { form: formData },
+          // eslint-disable-next-line
+          function (error, response, body) {
+            if (response.statusCode == 200) {
+              // console.log("Hell yeah")
+            }
+          }
+        )
       },
       onReset(evt) {
         evt.preventDefault()
