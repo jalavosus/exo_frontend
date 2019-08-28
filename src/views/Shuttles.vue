@@ -36,8 +36,18 @@
               v-model="form.time"
               :options="shuttleTimes")
 
-          b-button(type="submit" variant="primary" style="margin-bottom: -1.5em;" size="lg")
+          b-button(
+            type="submit" 
+            variant="primary" 
+            size="lg"
+            v-bind:disabled="submitButtonIsDisabled")
             | Book a shuttle!
+          br
+          b-button(
+            type="reset"
+            size="sm"
+            style="margin-top:0.5em; margin-bottom: -2em;")
+            | Reset
 </template>
 
 <style scoped>
@@ -84,6 +94,7 @@
           useCurrent: true,
         },
         shuttleTimes: [],
+        submitButtonIsDisabled: false,
       }
     },
     created() {
@@ -133,16 +144,17 @@
       onSubmit(evt) {
         evt.preventDefault()
         let formData = JSON.parse(JSON.stringify(this.form))
-        Request.post(
-          "https://backend.exo.fish/shuttles",
-          { form: formData },
-          // eslint-disable-next-line
-          function (error, response, body) {
-            if (response.statusCode == 200) {
-              // console.log("Hell yeah")
-            }
-          }
-        )
+        this.submitButtonIsDisabled = true
+        // Request.post(
+        //   "https://backend.exo.fish/shuttles",
+        //   { form: formData },
+        //   // eslint-disable-next-line
+        //   function (error, response, body) {
+        //     if (response.statusCode == 200) {
+        //       // console.log("Hell yeah")
+        //     }
+        //   }
+        // )
       },
       onReset(evt) {
         evt.preventDefault()
