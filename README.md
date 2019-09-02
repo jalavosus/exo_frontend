@@ -1,10 +1,6 @@
-# frontend
+# maccabee.io
 
-Decided to rewrite exofish to be both a legitimately useful site, as well as make it so it won't randomly go down. 
-
-The backend's entirely written in Go, now. :D 
-
-https://exo.fish
+More to come. 
 
 ## Project setup
 ```

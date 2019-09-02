@@ -146,7 +146,7 @@
         let formData = JSON.parse(JSON.stringify(this.form))
         this.submitButtonIsDisabled = true
         Request.post(
-          "https://backend.exo.fish/shuttles",
+          "http://localhost:8080/shuttles",
           { form: formData },
           // eslint-disable-next-line
           function (error, response, body) {
